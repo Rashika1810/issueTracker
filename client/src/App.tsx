@@ -10,6 +10,9 @@ import CreateOrganization from "./pages/CreateOrganization";
 import OrganizationDashboard from "./pages/OrganizationDashboard";
 import { OrganizationProvider } from "./context/OrganizationContext";
 import OrganizationRedirect from "./pages/OrganizationRedirect";
+import CreateProject from "./pages/CreateProject";
+import ProjectDetails from "./pages/ProjectDetails";
+import Projects from "./pages/Projects";
 
 function App() {
   return (
@@ -43,6 +46,32 @@ function App() {
               element={
                 <ProtectedRoute>
                   <OrganizationDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <ProtectedRoute>
+                  <Projects />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/projects/create"
+              element={
+                <ProtectedRoute>
+                  <CreateProject />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/projects/:id"
+              element={
+                <ProtectedRoute>
+                  <ProjectDetails />
                 </ProtectedRoute>
               }
             />

@@ -1,41 +1,12 @@
-import { useEffect, useState } from "react";
-
-import api from "../api/axios";
+import { useOrganization } from "../context/OrganizationContext";
+import { useNavigate } from "react-router-dom";
 
 export default function OrganizationDashboard() {
-  const [organization, setOrganization] =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useState<any>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
-    fetchOrganization();
-  }, []);
-
-  const fetchOrganization = async () => {
-    try {
-      const token =
-        localStorage.getItem("token");
-
-      const res = await api.get(
-        "/organizations/my",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setOrganization(
-        res.data.organization
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const { organization } = useOrganization();
+  const navigate = useNavigate();
 
   if (!organization) {
-    return <h1>Loading...</h1>;
+    return <div>Loading...</div>;
   }
 
   return (
@@ -44,10 +15,18 @@ export default function OrganizationDashboard() {
         {organization.name}
       </h1>
 
-      <p className="mt-3 text-gray-600">
-        Members:{" "}
-        {organization.members.length}
+      <p className="mt-2 text-gray-500">
+        Members: {organization.members.length}
       </p>
+
+      <div className="mt-8 flex gap-4">
+        <button
+          onClick={() => navigate("/projects")}
+          className="bg-black text-white px-4 py-2 rounded"
+        >
+          Projects
+        </button>
+      </div>
     </div>
   );
 }

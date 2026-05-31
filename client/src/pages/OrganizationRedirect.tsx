@@ -12,7 +12,8 @@ export default function OrganizationRedirect() {
       </div>
     );
   }
-
+console.log("REDIRECT LOADING:", loading);
+console.log("REDIRECT ORG:", organization);
   if (organization) {
     return <Navigate to="/organization" replace />;
   }
