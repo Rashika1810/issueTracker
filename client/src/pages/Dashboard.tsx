@@ -1,19 +1,21 @@
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="p-10">
       <h1 className="text-3xl font-bold">
-        Welcome {user?.name}
+        Dashboard
       </h1>
 
       <button
-        onClick={logout}
-        className="bg-red-500 text-white px-4 py-2 mt-5"
+        className="bg-black text-white px-4 py-2 mt-5"
+        onClick={() =>
+          navigate("/create-organization")
+        }
       >
-        Logout
+        Create Organization
       </button>
     </div>
   );
