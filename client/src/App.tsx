@@ -15,6 +15,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import Projects from "./pages/Projects";
 import CreateIssue from "./pages/createIssue";
 import IssueDetails from "./pages/IssueDetails";
+import ProjectBoard from "./pages/ProjectBoard";
 
 function App() {
   return (
@@ -90,6 +91,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <IssueDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects/:id/board"
+              element={
+                <ProtectedRoute>
+                  <ProjectBoard />
                 </ProtectedRoute>
               }
             />

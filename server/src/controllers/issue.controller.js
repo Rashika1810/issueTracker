@@ -74,7 +74,9 @@ exports.updateIssue = async (req, res) => {
         assignee,
         dueDate,
       },
-      { new: true },
+      {
+        new: true,
+      },
     );
 
     res.status(200).json({
