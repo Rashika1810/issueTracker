@@ -1,5 +1,5 @@
 const Issue = require("../models/Issue");
-
+const logActivity = require("../utils/activityLogger");
 exports.createIssue = async (req, res) => {
   try {
     const { projectId, title, description, priority } = req.body;
@@ -65,7 +65,7 @@ exports.getIssueById = async (req, res) => {
 exports.updateIssue = async (req, res) => {
   try {
     const { status, priority, assignee, dueDate } = req.body;
-
+    const existingIssue = await Issue.findById(req.params.id);
     const issue = await Issue.findByIdAndUpdate(
       req.params.id,
       {
@@ -78,6 +78,28 @@ exports.updateIssue = async (req, res) => {
         new: true,
       },
     );
+    if (status && status !== existingIssue.status) {
+      await logActivity({
+        issueId: issue._id,
+        userId: req.user.id,
+        action: "STATUS_CHANGED",
+        metadata: {
+          from: existingIssue.status,
+          to: status,
+        },
+      });
+    }
+    if (priority && priority !== existingIssue.priority) {
+      await logActivity({
+        issueId: issue._id,
+        userId: req.user.id,
+        action: "PRIORITY_CHANGED",
+        metadata: {
+          from: existingIssue.priority,
+          to: priority,
+        },
+      });
+    }
 
     res.status(200).json({
       success: true,

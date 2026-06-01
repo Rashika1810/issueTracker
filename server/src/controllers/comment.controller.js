@@ -1,4 +1,5 @@
 const Comment = require("../models/Comment");
+const logActivity = require("../utils/activityLogger");
 
 exports.createComment = async (req, res) => {
   try {
@@ -14,6 +15,11 @@ exports.createComment = async (req, res) => {
       "userId",
       "name email",
     );
+    await logActivity({
+      issueId,
+      userId: req.user.id,
+      action: "COMMENT_ADDED",
+    });
 
     res.status(201).json({
       success: true,

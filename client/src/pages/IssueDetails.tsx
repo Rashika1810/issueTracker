@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
+import { formatDistanceToNow } from "date-fns";
+import { formatActivity } from "../utils/CommentUtils";
 
 export default function IssueDetails() {
   const { id } = useParams();
@@ -12,7 +14,8 @@ export default function IssueDetails() {
   const [priority, setPriority] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [comments, setComments] = useState<any[]>([]);
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [activities, setActivities] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
@@ -20,8 +23,21 @@ export default function IssueDetails() {
     fetchIssue();
     // eslint-disable-next-line react-hooks/immutability
     fetchComments();
+    // eslint-disable-next-line react-hooks/immutability
+    fetchActivity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const fetchActivity = async () => {
+    const token = localStorage.getItem("token");
+
+    const res = await api.get(`/activity/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setActivities(res.data.logs);
+  };
   const fetchComments = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -58,7 +74,8 @@ export default function IssueDetails() {
 
       setCommentText("");
 
-      fetchComments();
+      await fetchComments();
+      await fetchActivity();
     } catch (error) {
       console.log(error);
     }
@@ -98,7 +115,8 @@ export default function IssueDetails() {
           },
         },
       );
-
+      await fetchIssue();
+      await fetchActivity();
       alert("Issue updated");
     } catch (error) {
       console.log(error);
@@ -182,6 +200,25 @@ export default function IssueDetails() {
             Add Comment
           </button>
         </div>
+      </div>
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-4">Activity</h2>
+
+        {activities.map((log) => (
+          <div className="border-l-2 pl-4 py-3">
+            <div>
+              <strong>{log.userId?.name}</strong> {formatActivity(log)}
+            </div>
+
+            <div className="text-xs text-gray-500">
+              {formatDistanceToNow(new Date(log.createdAt), {
+                addSuffix: true,
+              })}
+              {" • "}
+              {new Date(log.createdAt).toLocaleString()}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
