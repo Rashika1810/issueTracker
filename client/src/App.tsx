@@ -13,6 +13,8 @@ import OrganizationRedirect from "./pages/OrganizationRedirect";
 import CreateProject from "./pages/CreateProject";
 import ProjectDetails from "./pages/ProjectDetails";
 import Projects from "./pages/Projects";
+import CreateIssue from "./pages/createIssue";
+import IssueDetails from "./pages/IssueDetails";
 
 function App() {
   return (
@@ -72,6 +74,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProjectDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects/:id/issues/create"
+              element={
+                <ProtectedRoute>
+                  <CreateIssue />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/issues/:id"
+              element={
+                <ProtectedRoute>
+                  <IssueDetails />
                 </ProtectedRoute>
               }
             />
