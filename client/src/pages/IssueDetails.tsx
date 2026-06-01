@@ -10,12 +10,59 @@ export default function IssueDetails() {
     useState<any>(null);
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [comments, setComments] = useState<any[]>([]);
+
+  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
     fetchIssue();
+    // eslint-disable-next-line react-hooks/immutability
+    fetchComments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const fetchComments = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await api.get(`/comments/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setComments(res.data.comments);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const addComment = async () => {
+    if (!commentText.trim()) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await api.post(
+        "/comments",
+        {
+          issueId: id,
+          text: commentText,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setCommentText("");
+
+      fetchComments();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchIssue = async () => {
     const token = localStorage.getItem("token");
@@ -105,6 +152,36 @@ export default function IssueDetails() {
       <div className="mt-2">
         Assignee:
         {issue.assignee?.name || "Unassigned"}
+      </div>
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-4">Comments</h2>
+
+        <div className="space-y-3">
+          {comments.map((comment) => (
+            <div key={comment._id} className="border rounded p-3">
+              <div className="font-semibold">{comment.userId?.name}</div>
+
+              <p className="mt-1">{comment.text}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5">
+          <textarea
+            className="border w-full p-3"
+            rows={3}
+            placeholder="Add comment..."
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+          />
+
+          <button
+            onClick={addComment}
+            className="bg-black text-white px-4 py-2 mt-3 rounded"
+          >
+            Add Comment
+          </button>
+        </div>
       </div>
     </div>
   );
