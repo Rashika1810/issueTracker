@@ -1,5 +1,5 @@
 import { useOrganization } from "../context/OrganizationContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function OrganizationDashboard() {
   const { organization } = useOrganization();
@@ -16,7 +16,7 @@ export default function OrganizationDashboard() {
       </h1>
 
       <p className="mt-2 text-gray-500">
-        Members: {organization.members.length}
+        Members: {organization?.members?.length}
       </p>
 
       <div className="mt-8 flex gap-4">
@@ -27,6 +27,15 @@ export default function OrganizationDashboard() {
           Projects
         </button>
       </div>
+      <div className="flex gap-3 mt-4">
+
+  <Link
+    to="/organization/members"
+    className="bg-blue-600 text-white px-4 py-2 rounded"
+  >
+    Manage Members
+  </Link>
+</div>
     </div>
   );
 }

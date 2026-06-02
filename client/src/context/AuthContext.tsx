@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import api from "../api/axios";
 
 interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
 }
@@ -37,7 +37,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
       });
 
-      setUser(res.data.user);
+      setUser({
+        _id: res.data.user._id,
+        name: res.data.user.name,
+        email: res.data.user.email,
+      });
     } catch {
       localStorage.removeItem("token");
     } finally {

@@ -16,6 +16,7 @@ import Projects from "./pages/Projects";
 import CreateIssue from "./pages/createIssue";
 import IssueDetails from "./pages/IssueDetails";
 import ProjectBoard from "./pages/ProjectBoard";
+import OrganizationMembers from "./pages/OrganizationMembers";
 
 function App() {
   return (
@@ -99,6 +100,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProjectBoard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/organization/members"
+              element={
+                <ProtectedRoute>
+                  <OrganizationMembers />
                 </ProtectedRoute>
               }
             />

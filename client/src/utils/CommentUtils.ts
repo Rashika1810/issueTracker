@@ -12,6 +12,8 @@ export const formatActivity = (log: any) => {
 
     case "PRIORITY_CHANGED":
       return `changed priority from ${log.metadata.from} to ${log.metadata.to}`;
+    case "ASSIGNEE_CHANGED":
+  return `assigned issue from ${log.metadata.from} to ${log.metadata.to}`;
 
     default:
       return log.action;

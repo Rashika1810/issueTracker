@@ -1,5 +1,7 @@
 const Issue = require("../models/Issue");
 const logActivity = require("../utils/activityLogger");
+const User = require("../models/User");
+const Project = require("../models/Project");
 exports.createIssue = async (req, res) => {
   try {
     const { projectId, title, description, priority } = req.body;
@@ -65,7 +67,16 @@ exports.getIssueById = async (req, res) => {
 exports.updateIssue = async (req, res) => {
   try {
     const { status, priority, assignee, dueDate } = req.body;
+
     const existingIssue = await Issue.findById(req.params.id);
+
+    if (!existingIssue) {
+      return res.status(404).json({
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
     const issue = await Issue.findByIdAndUpdate(
       req.params.id,
       {
@@ -78,6 +89,8 @@ exports.updateIssue = async (req, res) => {
         new: true,
       },
     );
+
+    // Status Change
     if (status && status !== existingIssue.status) {
       await logActivity({
         issueId: issue._id,
@@ -89,6 +102,8 @@ exports.updateIssue = async (req, res) => {
         },
       });
     }
+
+    // Priority Change
     if (priority && priority !== existingIssue.priority) {
       await logActivity({
         issueId: issue._id,
@@ -97,6 +112,26 @@ exports.updateIssue = async (req, res) => {
         metadata: {
           from: existingIssue.priority,
           to: priority,
+        },
+      });
+    }
+
+    // Assignee Change
+    if (assignee && assignee !== existingIssue.assignee?.toString()) {
+      console.log("ASSIGNEE CHANGED");
+      const oldAssignee = existingIssue.assignee
+        ? await User.findById(existingIssue.assignee).select("name")
+        : null;
+
+      const newAssignee = await User.findById(assignee).select("name");
+
+      await logActivity({
+        issueId: issue._id,
+        userId: req.user.id,
+        action: "ASSIGNEE_CHANGED",
+        metadata: {
+          from: oldAssignee?.name || "Unassigned",
+          to: newAssignee?.name || "Unknown",
         },
       });
     }
