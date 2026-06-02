@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { formatDistanceToNow } from "date-fns";
 import { formatActivity } from "../utils/CommentUtils";
@@ -9,6 +9,7 @@ export default function IssueDetails() {
   const [issue, setIssue] =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useState<any>(null);
+  const navigate = useNavigate();
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,11 +17,10 @@ export default function IssueDetails() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [activities, setActivities] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
-const [assignee, setAssignee] =
-  useState("");
+  const [assignee, setAssignee] = useState("");
   const [members, setMembers] =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useState<any[]>([]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
     fetchIssue();
@@ -28,7 +28,7 @@ const [assignee, setAssignee] =
     fetchComments();
     // eslint-disable-next-line react-hooks/immutability
     fetchActivity();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const fetchActivity = async () => {
     const token = localStorage.getItem("token");
@@ -41,27 +41,21 @@ const [assignee, setAssignee] =
 
     setActivities(res.data.logs);
   };
-const fetchMembers = async (
-  projectId: string
-) => {
-  try {
-    const token =
-      localStorage.getItem("token");
+  const fetchMembers = async (projectId: string) => {
+    try {
+      const token = localStorage.getItem("token");
 
-    const res = await api.get(
-      `/projects/${projectId}/members`,
-      {
+      const res = await api.get(`/projects/${projectId}/members`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
+      });
 
-    setMembers(res.data.members);
-  } catch (error) {
-    console.log(error);
-  }
-};
+      setMembers(res.data.members);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const fetchComments = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -105,25 +99,25 @@ const fetchMembers = async (
     }
   };
 
-const fetchIssue = async () => {
-  const token = localStorage.getItem("token");
+  const fetchIssue = async () => {
+    const token = localStorage.getItem("token");
 
-  const res = await api.get(`/issues/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+    const res = await api.get(`/issues/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  const issueData = res.data.issue;
+    const issueData = res.data.issue;
 
-  setIssue(issueData);
-  setStatus(issueData.status);
-  setPriority(issueData.priority);
-  setAssignee(issueData.assignee?._id || "");
+    setIssue(issueData);
+    setStatus(issueData.status);
+    setPriority(issueData.priority);
+    setAssignee(issueData.assignee?._id || "");
 
-  // Fetch project members here
-  await fetchMembers(issueData.projectId);
-};
+    // Fetch project members here
+    await fetchMembers(issueData.projectId);
+  };
 
   if (!issue) {
     return <div>Loading...</div>;
@@ -137,7 +131,7 @@ const fetchIssue = async () => {
         {
           status,
           priority,
-          assignee
+          assignee,
         },
         {
           headers: {
@@ -148,6 +142,29 @@ const fetchIssue = async () => {
       await fetchIssue();
       await fetchActivity();
       alert("Issue updated");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const deleteIssue = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this issue?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await api.delete(`/issues/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Issue deleted");
+
+      navigate(-1);
     } catch (error) {
       console.log(error);
     }
@@ -187,41 +204,38 @@ const fetchIssue = async () => {
         </span>
       </div>
       <div className="mt-4">
-  <label className="block mb-2">
-    Assignee
-  </label>
+        <label className="block mb-2">Assignee</label>
 
-  <select
-    value={assignee}
-    onChange={(e) =>
-      setAssignee(
-        e.target.value
-      )
-    }
-    className="border p-2 w-full"
-  >
-    <option value="" disabled>
-      Unassigned
-    </option>
-
-    {members.map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (member: any) => (
-        <option
-          key={member._id}
-          value={member._id}
+        <select
+          value={assignee}
+          onChange={(e) => setAssignee(e.target.value)}
+          className="border p-2 w-full"
         >
-          {member.name}
-        </option>
-      )
-    )}
-  </select>
-</div>
+          <option value="" disabled>
+            Unassigned
+          </option>
+
+          {members.map(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (member: any) => (
+              <option key={member._id} value={member._id}>
+                {member.name}
+              </option>
+            ),
+          )}
+        </select>
+      </div>
       <button
         onClick={updateIssue}
         className="bg-black text-white px-4 py-2 rounded mt-5"
       >
         Save Changes
+      </button>
+      <button
+        onClick={deleteIssue}
+        className="bg-red-600 text-white px-4 py-2 rounded"
+      >
+        Delete Issue
       </button>
       <div className="mt-4">
         Reporter:

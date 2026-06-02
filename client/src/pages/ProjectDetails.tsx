@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 
 export default function ProjectDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [project, setProject] = useState<any>(null);
@@ -29,7 +30,27 @@ export default function ProjectDetails() {
 
     setProject(res.data.project);
   };
+  const deleteProject = async () => {
+    const confirmed = window.confirm("Delete this project and all issues?");
 
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await api.delete(`/projects/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Project deleted");
+
+      navigate("/projects");
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const fetchIssues = async () => {
     const token = localStorage.getItem("token");
 
@@ -51,6 +72,12 @@ export default function ProjectDetails() {
       <h1 className="text-4xl font-bold">{project.name}</h1>
 
       <p className="mt-2">{project.description}</p>
+      <button
+        onClick={deleteProject}
+        className="bg-red-600 text-white px-4 py-2 rounded"
+      >
+        Delete Project
+      </button>
 
       <Link
         to={`/projects/${id}/issues/create`}

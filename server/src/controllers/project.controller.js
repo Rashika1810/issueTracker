@@ -1,6 +1,7 @@
 const Project = require("../models/Project");
 const Organization = require("../models/Organization");
-
+const Issue = require("../models/Issue");
+const logActivity = require("../utils/activityLogger");
 // Create Project
 exports.createProject = async (req, res) => {
   try {
@@ -37,6 +38,41 @@ exports.createProject = async (req, res) => {
   }
 };
 
+exports.deleteProject = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      });
+    }
+
+    if (project.ownerId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Only project owner can delete project",
+      });
+    }
+
+    await Issue.deleteMany({
+      projectId: project._id,
+    });
+
+    await Project.findByIdAndDelete(project._id);
+
+    res.status(200).json({
+      success: true,
+      message: "Project deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // Get Projects
 exports.getProjects = async (req, res) => {
   try {
@@ -63,9 +99,10 @@ exports.getProjects = async (req, res) => {
 // Get Project By Id
 exports.getProjectById = async (req, res) => {
   try {
-    const project = await Project.findById(
-      req.params.id
-    ).populate("members", "name email");
+    const project = await Project.findById(req.params.id).populate(
+      "members",
+      "name email",
+    );
 
     if (!project) {
       return res.status(404).json({
@@ -75,7 +112,7 @@ exports.getProjectById = async (req, res) => {
     }
 
     const isMember = project.members.some(
-      (member) => member._id.toString() === req.user.id
+      (member) => member._id.toString() === req.user.id,
     );
 
     if (!isMember) {
