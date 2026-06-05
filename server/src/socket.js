@@ -11,23 +11,17 @@ const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(
-      "User connected:",
-      socket.id
-    );
+    console.log("User connected:", socket.id);
 
-    socket.on(
-      "join-user-room",
-      (userId) => {
-        socket.join(userId);
-      }
-    );
+    socket.on("join-user-room", (userId) => {
+      socket.join(userId);
+    });
+    socket.on("join-project-room", (projectId) => {
+      socket.join(projectId);
+    });
 
     socket.on("disconnect", () => {
-      console.log(
-        "User disconnected:",
-        socket.id
-      );
+      console.log("User disconnected:", socket.id);
     });
   });
 };

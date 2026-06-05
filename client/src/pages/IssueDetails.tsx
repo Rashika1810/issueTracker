@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { formatDistanceToNow } from "date-fns";
 import { formatActivity } from "../utils/CommentUtils";
+import { socket } from "../socket";
 
 export default function IssueDetails() {
   const { id } = useParams();
@@ -91,8 +92,6 @@ export default function IssueDetails() {
       );
 
       setCommentText("");
-
-      await fetchComments();
       await fetchActivity();
     } catch (error) {
       console.log(error);
@@ -118,10 +117,34 @@ export default function IssueDetails() {
     // Fetch project members here
     await fetchMembers(issueData.projectId);
   };
+  useEffect(() => {
+    if (issue?.projectId) {
+      socket.emit("join-project-room", issue.projectId);
+    }
+  }, [issue]);
+
+  useEffect(() => {
+    socket.on("comment-added", (comment) => {
+      setComments((prev) => {
+        const exists = prev.some((c) => c._id === comment._id);
+
+        if (exists) {
+          return prev;
+        }
+
+        return [...prev, comment];
+      });
+    });
+
+    return () => {
+      socket.off("comment-added");
+    };
+  }, []);
 
   if (!issue) {
     return <div>Loading...</div>;
   }
+
   const updateIssue = async () => {
     try {
       const token = localStorage.getItem("token");

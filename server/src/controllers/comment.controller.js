@@ -1,6 +1,7 @@
 const Comment = require("../models/Comment");
 const logActivity = require("../utils/activityLogger");
-
+const Issue = require("../models/Issue");
+const { getIO } = require("../socket");
 exports.createComment = async (req, res) => {
   try {
     const { issueId, text } = req.body;
@@ -15,11 +16,20 @@ exports.createComment = async (req, res) => {
       "userId",
       "name email",
     );
+
     await logActivity({
       issueId,
       userId: req.user.id,
       action: "COMMENT_ADDED",
     });
+
+    const issue = await Issue.findById(issueId);
+
+    const io = getIO();
+
+    if (io && issue) {
+      io.to(issue.projectId.toString()).emit("comment-added", populatedComment);
+    }
 
     res.status(201).json({
       success: true,
