@@ -19,103 +19,109 @@ import ProjectBoard from "./pages/ProjectBoard";
 import OrganizationMembers from "./pages/OrganizationMembers";
 import Notifications from "./pages/Notifications";
 import ProjectMembers from "./pages/ProjectMembers";
+import { NotificationProvider } from "./context/NotificationContext";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <OrganizationProvider>
-          <Routes>
-            <Route path="/" element={<Login />} />
+          <NotificationProvider>
+            <Routes>
+              <Route path="/" element={<Login />} />
 
-            <Route path="/signup" element={<Signup />} />
+              <Route path="/signup" element={<Signup />} />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <OrganizationRedirect />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/create-organization"
-              element={
-                <ProtectedRoute>
-                  <CreateOrganization />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <OrganizationRedirect />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-organization"
+                element={
+                  <ProtectedRoute>
+                    <CreateOrganization />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/organization"
-              element={
-                <ProtectedRoute>
-                  <OrganizationDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projects"
-              element={
-                <ProtectedRoute>
-                  <Projects />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/organization"
+                element={
+                  <ProtectedRoute>
+                    <OrganizationDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects"
+                element={
+                  <ProtectedRoute>
+                    <Projects />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/projects/create"
-              element={
-                <ProtectedRoute>
-                  <CreateProject />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/projects/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateProject />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/projects/:id"
-              element={
-                <ProtectedRoute>
-                  <ProjectDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projects/:id/issues/create"
-              element={
-                <ProtectedRoute>
-                  <CreateIssue />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/issues/:id"
-              element={
-                <ProtectedRoute>
-                  <IssueDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projects/:id/board"
-              element={
-                <ProtectedRoute>
-                  <ProjectBoard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/organization/members"
-              element={
-                <ProtectedRoute>
-                  <OrganizationMembers />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/projects/:id/members" element={<ProjectMembers />} />
-          </Routes>
+              <Route
+                path="/projects/:id"
+                element={
+                  <ProtectedRoute>
+                    <ProjectDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects/:id/issues/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateIssue />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/issues/:id"
+                element={
+                  <ProtectedRoute>
+                    <IssueDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects/:id/board"
+                element={
+                  <ProtectedRoute>
+                    <ProjectBoard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/organization/members"
+                element={
+                  <ProtectedRoute>
+                    <OrganizationMembers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route
+                path="/projects/:id/members"
+                element={<ProjectMembers />}
+              />
+            </Routes>
+          </NotificationProvider>
         </OrganizationProvider>
       </AuthProvider>
     </BrowserRouter>

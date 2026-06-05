@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-
+import { socket } from "../socket";
 import api from "../api/axios";
 
 interface User {
@@ -53,6 +53,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUser();
   }, []);
+  useEffect(() => {
+    if (user) {
+      socket.connect();
+
+      socket.emit("join-user-room", user._id);
+    }
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user]);
 
   const login = async (token: string) => {
     localStorage.setItem("token", token);

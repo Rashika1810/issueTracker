@@ -1,39 +1,12 @@
-import { useEffect, useState } from "react";
 import { useOrganization } from "../context/OrganizationContext";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
+
+import { useNotifications } from "../context/NotificationContext";
 
 export default function OrganizationDashboard() {
   const { organization } = useOrganization();
   const navigate = useNavigate();
-
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const fetchNotifications = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await api.get("/notifications", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const unread = res.data.notifications.filter(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (notification: any) => !notification.isRead
-      ).length;
-
-      setUnreadCount(unread);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchNotifications();
-  }, []);
+  const { unreadCount } = useNotifications();
 
   if (!organization) {
     return <div>Loading...</div>;
@@ -41,9 +14,7 @@ export default function OrganizationDashboard() {
 
   return (
     <div className="p-10">
-      <h1 className="text-4xl font-bold">
-        {organization.name}
-      </h1>
+      <h1 className="text-4xl font-bold">{organization.name}</h1>
 
       <p className="mt-2 text-gray-500">
         Members: {organization.members.length}
@@ -66,26 +37,10 @@ export default function OrganizationDashboard() {
 
         <Link
           to="/notifications"
-          className="relative bg-yellow-500 text-white px-4 py-2 rounded"
+          className="bg-orange-600 text-white px-4 py-2 rounded"
         >
-          🔔 Notifications
-
-          {unreadCount > 0 && (
-            <span
-              className="
-                absolute
-                -top-2
-                -right-2
-                bg-red-600
-                text-white
-                text-xs
-                rounded-full
-                px-2
-              "
-            >
-              {unreadCount}
-            </span>
-          )}
+          Notifications
+          {unreadCount > 0 && ` (${unreadCount})`}
         </Link>
       </div>
     </div>
