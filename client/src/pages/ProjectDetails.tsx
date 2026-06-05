@@ -91,6 +91,12 @@ export default function ProjectDetails() {
       >
         Open Board
       </Link>
+      <Link
+        to={`/projects/${project._id}/members`}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        Manage Members
+      </Link>
 
       <div className="mt-10">
         <h2 className="text-2xl font-semibold mb-4">Issues</h2>

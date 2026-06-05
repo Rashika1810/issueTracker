@@ -37,7 +37,7 @@ exports.getMyOrganization = async (req, res) => {
   try {
     const organization = await Organization.findOne({
       ownerId: req.user.id,
-    });
+    }).populate("members", "name email");
 
     if (!organization) {
       return res.status(200).json({

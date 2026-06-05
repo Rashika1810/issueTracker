@@ -29,6 +29,26 @@ exports.createIssue = async (req, res) => {
 
 exports.getProjectIssues = async (req, res) => {
   try {
+    const project = await Project.findById(req.params.projectId);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      });
+    }
+
+    const isMember = project.members.some(
+      (member) => member.toString() === req.user.id,
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
     const issues = await Issue.find({
       projectId: req.params.projectId,
     })
@@ -52,6 +72,26 @@ exports.getIssueById = async (req, res) => {
     const issue = await Issue.findById(req.params.id)
       .populate("reporter", "name email")
       .populate("assignee", "name email");
+
+    if (!issue) {
+      return res.status(404).json({
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    const project = await Project.findById(issue.projectId);
+
+    const isMember = project.members.some(
+      (member) => member.toString() === req.user.id,
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -136,13 +176,13 @@ exports.updateIssue = async (req, res) => {
         },
       });
     }
-    const assignedUser = await User.findById(assignee);
-
-    await createNotification({
-      userId: assignee,
-      type: "ISSUE_ASSIGNED",
-      message: `${req.user.name} assigned issue "${issue.title}" to you`,
-    });
+    if (assignee && assignee !== existingIssue.assignee?.toString()) {
+      await createNotification({
+        userId: assignee,
+        type: "ISSUE_ASSIGNED",
+        message: `${req.user.name} assigned issue "${issue.title}" to you`,
+      });
+    }
 
     res.status(200).json({
       success: true,

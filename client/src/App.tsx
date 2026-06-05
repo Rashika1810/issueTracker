@@ -18,6 +18,7 @@ import IssueDetails from "./pages/IssueDetails";
 import ProjectBoard from "./pages/ProjectBoard";
 import OrganizationMembers from "./pages/OrganizationMembers";
 import Notifications from "./pages/Notifications";
+import ProjectMembers from "./pages/ProjectMembers";
 
 function App() {
   return (
@@ -113,6 +114,7 @@ function App() {
               }
             />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/projects/:id/members" element={<ProjectMembers />} />
           </Routes>
         </OrganizationProvider>
       </AuthProvider>
