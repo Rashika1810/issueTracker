@@ -31,6 +31,24 @@ export default function IssueDetails() {
     fetchActivity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    socket.on("activity-added", (activity) => {
+      if (activity.issueId?._id === id) {
+        setActivities((prev) => {
+          const exists = prev.some((a) => a._id === activity._id);
+
+          if (exists) return prev;
+
+          return [activity, ...prev];
+        });
+      }
+    });
+
+    return () => {
+      socket.off("activity-added");
+    };
+  }, [id]);
   const fetchActivity = async () => {
     const token = localStorage.getItem("token");
 
@@ -92,7 +110,6 @@ export default function IssueDetails() {
       );
 
       setCommentText("");
-      await fetchActivity();
     } catch (error) {
       console.log(error);
     }
@@ -163,7 +180,6 @@ export default function IssueDetails() {
         },
       );
       await fetchIssue();
-      await fetchActivity();
       alert("Issue updated");
     } catch (error) {
       console.log(error);
