@@ -2,6 +2,7 @@ const Issue = require("../models/Issue");
 const logActivity = require("../utils/activityLogger");
 const User = require("../models/User");
 const Project = require("../models/Project");
+const createNotification = require("../utils/createNotification");
 exports.createIssue = async (req, res) => {
   try {
     const { projectId, title, description, priority } = req.body;
@@ -135,6 +136,13 @@ exports.updateIssue = async (req, res) => {
         },
       });
     }
+    const assignedUser = await User.findById(assignee);
+
+    await createNotification({
+      userId: assignee,
+      type: "ISSUE_ASSIGNED",
+      message: `${req.user.name} assigned issue "${issue.title}" to you`,
+    });
 
     res.status(200).json({
       success: true,

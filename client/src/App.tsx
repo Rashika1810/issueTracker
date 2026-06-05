@@ -17,6 +17,7 @@ import CreateIssue from "./pages/createIssue";
 import IssueDetails from "./pages/IssueDetails";
 import ProjectBoard from "./pages/ProjectBoard";
 import OrganizationMembers from "./pages/OrganizationMembers";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -111,6 +112,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/notifications" element={<Notifications />} />
           </Routes>
         </OrganizationProvider>
       </AuthProvider>
