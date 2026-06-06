@@ -3,6 +3,7 @@ const logActivity = require("../utils/activityLogger");
 const User = require("../models/User");
 const Project = require("../models/Project");
 const createNotification = require("../utils/createNotification");
+const { getIO } = require("../socket");
 exports.createIssue = async (req, res) => {
   try {
     const { projectId, title, description, priority } = req.body;
@@ -130,7 +131,13 @@ exports.updateIssue = async (req, res) => {
         new: true,
       },
     );
+    const io = getIO();
 
+    const populatedIssue = await Issue.findById(issue._id)
+      .populate("reporter", "name email")
+      .populate("assignee", "name email");
+
+    io.to(issue.projectId.toString()).emit("issue-updated", populatedIssue);
     // Status Change
     if (status && status !== existingIssue.status) {
       await logActivity({

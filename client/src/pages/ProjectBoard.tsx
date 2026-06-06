@@ -1,21 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-} from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import api from "../api/axios";
+import { socket } from "../socket";
 
-const STATUSES = [
-  "Todo",
-  "In Progress",
-  "Testing",
-  "Done",
-  "Blocked",
-];
+const STATUSES = ["Todo", "In Progress", "Testing", "Done", "Blocked"];
 
 export default function ProjectBoard() {
   const { id } = useParams();
@@ -26,21 +17,41 @@ export default function ProjectBoard() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
     fetchIssues();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (id) {
+      socket.emit("join-project-room", id);
+    }
+  }, [id]);
+  useEffect(() => {
+    socket.on("issue-updated", (updatedIssue) => {
+      setIssues((prev) =>
+        prev.map((issue) =>
+          issue._id === updatedIssue._id
+            ? {
+                ...issue,
+                ...updatedIssue,
+              }
+            : issue,
+        ),
+      );
+    });
+
+    return () => {
+      socket.off("issue-updated");
+    };
   }, []);
 
   const fetchIssues = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await api.get(
-        `/issues/project/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await api.get(`/issues/project/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setIssues(res.data.issues);
     } catch (error) {
@@ -48,10 +59,7 @@ export default function ProjectBoard() {
     }
   };
 
-  const updateIssueStatus = async (
-    issueId: string,
-    status: string
-  ) => {
+  const updateIssueStatus = async (issueId: string, status: string) => {
     try {
       const token = localStorage.getItem("token");
 
@@ -64,7 +72,7 @@ export default function ProjectBoard() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
     } catch (error) {
       console.log(error);
@@ -73,15 +81,13 @@ export default function ProjectBoard() {
 
   const onDragEnd = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    result: any
+    result: any,
   ) => {
-    const { destination, draggableId } =
-      result;
+    const { destination, draggableId } = result;
 
     if (!destination) return;
 
-    const newStatus =
-      destination.droppableId;
+    const newStatus = destination.droppableId;
 
     setIssues((prev) =>
       prev.map((issue) =>
@@ -90,88 +96,58 @@ export default function ProjectBoard() {
               ...issue,
               status: newStatus,
             }
-          : issue
-      )
+          : issue,
+      ),
     );
 
-    await updateIssueStatus(
-      draggableId,
-      newStatus
-    );
+    await updateIssueStatus(draggableId, newStatus);
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-8">
-        Kanban Board
-      </h1>
+      <h1 className="text-3xl font-bold mb-8">Kanban Board</h1>
 
-      <DragDropContext
-        onDragEnd={onDragEnd}
-      >
+      <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-5 gap-4">
           {STATUSES.map((status) => {
-            const columnIssues =
-              issues.filter(
-                (issue) =>
-                  issue.status === status
-              );
+            const columnIssues = issues.filter(
+              (issue) => issue.status === status,
+            );
 
             return (
-              <Droppable
-                key={status}
-                droppableId={status}
-              >
+              <Droppable key={status} droppableId={status}>
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className="bg-gray-100 rounded-lg p-3 min-h-125"
                   >
-                    <h2 className="font-bold mb-4">
-                      {status}
-                    </h2>
+                    <h2 className="font-bold mb-4">{status}</h2>
 
-                    {columnIssues.map(
-                      (issue, index) => (
-                        <Draggable
-                          key={issue._id}
-                          draggableId={
-                            issue._id
-                          }
-                          index={index}
-                        >
-                          {(
-                            provided
-                          ) => (
-                            <div
-                              ref={
-                                provided.innerRef
-                              }
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className="bg-white p-3 rounded border mb-3 shadow-sm"
-                            >
-                              <h3 className="font-medium">
-                                {
-                                  issue.title
-                                }
-                              </h3>
+                    {columnIssues.map((issue, index) => (
+                      <Draggable
+                        key={issue._id}
+                        draggableId={issue._id}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="bg-white p-3 rounded border mb-3 shadow-sm"
+                          >
+                            <h3 className="font-medium">{issue.title}</h3>
 
-                              <p className="text-sm text-gray-500 mt-1">
-                                {
-                                  issue.priority
-                                }
-                              </p>
-                            </div>
-                          )}
-                        </Draggable>
-                      )
-                    )}
+                            <p className="text-sm text-gray-500 mt-1">
+                              {issue.priority}
+                            </p>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
 
-                    {
-                      provided.placeholder
-                    }
+                    {provided.placeholder}
                   </div>
                 )}
               </Droppable>
