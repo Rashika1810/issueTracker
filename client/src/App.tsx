@@ -20,6 +20,7 @@ import OrganizationMembers from "./pages/OrganizationMembers";
 import Notifications from "./pages/Notifications";
 import ProjectMembers from "./pages/ProjectMembers";
 import { NotificationProvider } from "./context/NotificationContext";
+import MyTasks from "./pages/MyTask";
 
 function App() {
   return (
@@ -115,10 +116,29 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/notifications" element={<Notifications />} />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/projects/:id/members"
-                element={<ProjectMembers />}
+                element={
+                  <ProtectedRoute>
+                    <ProjectMembers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-tasks"
+                element={
+                  <ProtectedRoute>
+                    <MyTasks />
+                  </ProtectedRoute>
+                }
               />
             </Routes>
           </NotificationProvider>

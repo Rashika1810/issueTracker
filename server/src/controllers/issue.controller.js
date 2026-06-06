@@ -218,3 +218,25 @@ exports.deleteIssue = async (req, res) => {
     });
   }
 };
+exports.getMyIssues = async (req, res) => {
+  try {
+    const issues = await Issue.find({
+      assignee: req.user.id,
+    })
+      .populate("projectId", "name")
+      .populate("reporter", "name email")
+      .sort({
+        updatedAt: -1,
+      });
+
+    res.status(200).json({
+      success: true,
+      issues,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
