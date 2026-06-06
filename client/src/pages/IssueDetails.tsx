@@ -13,6 +13,7 @@ export default function IssueDetails() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
+  const [dueDate, setDueDate] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [comments, setComments] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,7 +130,13 @@ export default function IssueDetails() {
     setIssue(issueData);
     setStatus(issueData.status);
     setPriority(issueData.priority);
-    setAssignee(issueData.assignee?._id || "");
+    setAssignee(res.data.issue.assignee?._id || "");
+
+    setDueDate(
+      res.data.issue.dueDate
+        ? new Date(res.data.issue.dueDate).toISOString().split("T")[0]
+        : "",
+    );
 
     // Fetch project members here
     await fetchMembers(issueData.projectId);
@@ -172,6 +179,7 @@ export default function IssueDetails() {
           status,
           priority,
           assignee,
+          dueDate,
         },
         {
           headers: {
@@ -264,6 +272,16 @@ export default function IssueDetails() {
           )}
         </select>
       </div>
+      <div className="mt-4">
+        <label className="block mb-2">Due Date</label>
+
+        <input
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="border p-2 w-full"
+        />
+      </div>
       <button
         onClick={updateIssue}
         className="bg-black text-white px-4 py-2 rounded mt-5"
@@ -284,6 +302,12 @@ export default function IssueDetails() {
       <div className="mt-2">
         Assignee:
         {issue.assignee?.name || "Unassigned"}
+      </div>
+      <div className="mt-2">
+        Due Date:
+        {issue.dueDate
+          ? new Date(issue.dueDate).toLocaleDateString()
+          : "Not Set"}
       </div>
       <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Comments</h2>

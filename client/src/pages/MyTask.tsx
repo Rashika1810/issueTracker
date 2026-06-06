@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { Link } from "react-router-dom";
-
+import { isOverdue } from "../utils/dateUtils";
 export default function MyTasks() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [issues, setIssues] = useState<any[]>([]);
-
+  const overdueIssues = issues.filter(
+    (issue) => issue.status !== "Done" && isOverdue(issue.dueDate),
+  );
   const fetchMyIssues = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -63,12 +65,22 @@ export default function MyTasks() {
           <div className="text-xl font-bold">{doneIssues.length}</div>
           <div>Done</div>
         </div>
+        <div className="bg-red-100 p-4 rounded">
+          <div className="text-xl font-bold">{overdueIssues.length}</div>
+          <div>Overdue</div>
+        </div>
       </div>
 
       <div className="space-y-4">
         {issues.map((issue) => (
           <Link key={issue._id} to={`/issues/${issue._id}`}>
-            <div className="border rounded p-4 hover:bg-gray-50">
+            <div
+              className={`border rounded p-4 hover:bg-gray-50 ${
+                issue.status !== "Done" && isOverdue(issue.dueDate)
+                  ? "border-red-500 bg-red-50"
+                  : ""
+              }`}
+            >
               <div className="font-semibold">{issue.title}</div>
 
               <div className="text-sm text-gray-500 mt-1">
@@ -78,6 +90,13 @@ export default function MyTasks() {
               <div className="text-sm mt-2">Status: {issue.status}</div>
 
               <div className="text-sm">Priority: {issue.priority}</div>
+
+              <div className="text-sm">
+                Due:
+                {issue.dueDate
+                  ? new Date(issue.dueDate).toLocaleDateString()
+                  : "Not Set"}
+              </div>
             </div>
           </Link>
         ))}

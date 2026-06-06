@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import api from "../api/axios";
 import { socket } from "../socket";
+import { isOverdue } from "../utils/dateUtils";
 
 const STATUSES = ["Todo", "In Progress", "Testing", "Done", "Blocked"];
 
@@ -135,12 +136,23 @@ export default function ProjectBoard() {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className="bg-white p-3 rounded border mb-3 shadow-sm"
+                            className={`p-3 rounded border mb-3 shadow-sm ${
+                              issue.status !== "Done" &&
+                              isOverdue(issue.dueDate)
+                                ? "bg-red-50 border-red-500"
+                                : "bg-white"
+                            }`}
                           >
                             <h3 className="font-medium">{issue.title}</h3>
 
                             <p className="text-sm text-gray-500 mt-1">
                               {issue.priority}
+                              <p className="text-xs text-gray-500 mt-1">
+                                Due:
+                                {issue.dueDate
+                                  ? new Date(issue.dueDate).toLocaleDateString()
+                                  : "-"}
+                              </p>
                             </p>
                           </div>
                         )}
