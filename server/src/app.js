@@ -8,6 +8,7 @@ const issueRoutes = require("./routes/issue.routes");
 const commentRoutes = require("./routes/comment.routes");
 const activityRoutes = require("./routes/activity.routes");
 const notificationRoutes = require("./routes/notification.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 const app = express();
 
@@ -29,5 +30,6 @@ app.use("/api/issues", issueRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 module.exports = app;

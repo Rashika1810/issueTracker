@@ -21,6 +21,7 @@ import Notifications from "./pages/Notifications";
 import ProjectMembers from "./pages/ProjectMembers";
 import { NotificationProvider } from "./context/NotificationContext";
 import MyTasks from "./pages/MyTask";
+import DashboardAnalytics from "./pages/DashboardAnalytics";
 
 function App() {
   return (
@@ -137,6 +138,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MyTasks />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <DashboardAnalytics/>
                   </ProtectedRoute>
                 }
               />

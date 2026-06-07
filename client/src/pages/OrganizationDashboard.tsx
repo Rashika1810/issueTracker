@@ -40,6 +40,12 @@ export default function OrganizationDashboard() {
         >
           My Tasks
         </Link>
+        <Link
+          to="/analytics"
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Analytics
+        </Link>
 
         <Link
           to="/notifications"
