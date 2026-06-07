@@ -30,29 +30,32 @@ exports.createIssue = async (req, res) => {
 
 exports.getProjectIssues = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.projectId);
+    const { status, priority, assignee, search } = req.query;
 
-    if (!project) {
-      return res.status(404).json({
-        success: false,
-        message: "Project not found",
-      });
-    }
-
-    const isMember = project.members.some(
-      (member) => member.toString() === req.user.id,
-    );
-
-    if (!isMember) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
-    }
-
-    const issues = await Issue.find({
+    const query = {
       projectId: req.params.projectId,
-    })
+    };
+
+    if (status && status !== "All") {
+      query.status = status;
+    }
+
+    if (priority && priority !== "All") {
+      query.priority = priority;
+    }
+
+    if (assignee && assignee !== "All") {
+      query.assignee = assignee;
+    }
+
+    if (search) {
+      query.title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    const issues = await Issue.find(query)
       .populate("reporter", "name email")
       .populate("assignee", "name email");
 
