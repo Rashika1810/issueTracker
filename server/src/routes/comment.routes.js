@@ -9,7 +9,9 @@ const {
   getCommentsByIssue,
 } = require("../controllers/comment.controller");
 
-router.post("/", authMiddleware, createComment);
+const upload = require("../middleware/upload");
+
+router.post("/", authMiddleware, upload.single("file"), createComment);
 
 router.get("/:issueId", authMiddleware, getCommentsByIssue);
 

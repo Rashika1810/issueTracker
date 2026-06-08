@@ -2,15 +2,33 @@ const Comment = require("../models/Comment");
 const logActivity = require("../utils/activityLogger");
 const Issue = require("../models/Issue");
 const { getIO } = require("../socket");
+
 exports.createComment = async (req, res) => {
   try {
     const { issueId, text } = req.body;
-
-    const comment = await Comment.create({
+    if (!text?.trim() && !req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Comment or attachment required",
+      });
+    }
+    const commentData = {
       issueId,
       userId: req.user.id,
       text,
-    });
+    };
+
+    if (req.file) {
+      commentData.attachment = {
+        fileName: req.file.originalname,
+
+        fileUrl: "/uploads/" + req.file.filename,
+
+        mimeType: req.file.mimetype,
+      };
+    }
+
+    const comment = await Comment.create(commentData);
 
     const populatedComment = await Comment.findById(comment._id).populate(
       "userId",
@@ -22,14 +40,6 @@ exports.createComment = async (req, res) => {
       userId: req.user.id,
       action: "COMMENT_ADDED",
     });
-
-    const issue = await Issue.findById(issueId);
-
-    const io = getIO();
-
-    if (io && issue) {
-      io.to(issue.projectId.toString()).emit("comment-added", populatedComment);
-    }
 
     res.status(201).json({
       success: true,

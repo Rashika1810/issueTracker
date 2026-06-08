@@ -26,6 +26,11 @@ export default function IssueDetails() {
   const [type, setType] = useState("");
 
   const [component, setComponent] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  const [fileType, setFileType] = useState("");
 
   const [tags, setTags] = useState("");
   useEffect(() => {
@@ -55,6 +60,18 @@ export default function IssueDetails() {
       socket.off("activity-added");
     };
   }, [id]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setSelectedFile(file);
+
+    setFileType(file.type);
+
+    setPreviewUrl(URL.createObjectURL(file));
+  };
   const fetchActivity = async () => {
     const token = localStorage.getItem("token");
 
@@ -96,26 +113,41 @@ export default function IssueDetails() {
       console.log(error);
     }
   };
+
   const addComment = async () => {
-    if (!commentText.trim()) return;
+    if (!commentText.trim() && !selectedFile) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
 
-      await api.post(
-        "/comments",
-        {
-          issueId: id,
-          text: commentText,
+      const formData = new FormData();
+
+      formData.append("issueId", id!);
+
+      formData.append("text", commentText);
+
+      if (selectedFile) {
+        formData.append("file", selectedFile);
+      }
+
+      await api.post("/comments", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      });
 
       setCommentText("");
+
+      setSelectedFile(null);
+
+      setPreviewUrl("");
+
+      setFileType("");
+
+      await fetchComments();
     } catch (error) {
       console.log(error);
     }
@@ -367,12 +399,81 @@ export default function IssueDetails() {
             <div key={comment._id} className="border rounded p-3">
               <div className="font-semibold">{comment.userId?.name}</div>
 
-              <p className="mt-1">{comment.text}</p>
+              {comment.attachment && (
+                <>
+                  {comment.attachment.mimeType?.startsWith("image/") && (
+                    <img
+                      src={`http://localhost:5000${comment.attachment.fileUrl}`}
+                      alt=""
+                      className="max-w-md rounded mb-2"
+                    />
+                  )}
+
+                  {comment.attachment.mimeType?.startsWith("video/") && (
+                    <video controls className="max-w-md rounded mb-2">
+                      <source
+                        src={`http://localhost:5000${comment.attachment.fileUrl}`}
+                      />
+                    </video>
+                  )}
+
+                  {comment.attachment.mimeType?.startsWith("audio/") && (
+                    <audio controls className="mb-2">
+                      <source
+                        src={`http://localhost:5000${comment.attachment.fileUrl}`}
+                      />
+                    </audio>
+                  )}
+
+                  {!comment.attachment.mimeType?.startsWith("image/") &&
+                    !comment.attachment.mimeType?.startsWith("video/") &&
+                    !comment.attachment.mimeType?.startsWith("audio/") && (
+                      <a
+                        href={`http://localhost:5000${comment.attachment.fileUrl}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 underline block mb-2"
+                      >
+                        📄 {comment.attachment.fileName}
+                      </a>
+                    )}
+                </>
+              )}
+
+              {comment.text && <p>{comment.text}</p>}
             </div>
           ))}
         </div>
 
-        <div className="mt-5">
+        <div className="mt-5 border rounded p-4">
+          {selectedFile && (
+            <div className="mb-3">
+              {fileType.startsWith("image/") && (
+                <img src={previewUrl} alt="" className="max-h-60 rounded" />
+              )}
+
+              {fileType.startsWith("video/") && (
+                <video controls className="max-h-60 rounded">
+                  <source src={previewUrl} />
+                </video>
+              )}
+
+              {fileType.startsWith("audio/") && (
+                <audio controls>
+                  <source src={previewUrl} />
+                </audio>
+              )}
+
+              {!fileType.startsWith("image/") &&
+                !fileType.startsWith("video/") &&
+                !fileType.startsWith("audio/") && (
+                  <div className="p-3 bg-gray-100 rounded">
+                    📄 {selectedFile.name}
+                  </div>
+                )}
+            </div>
+          )}
+
           <textarea
             className="border w-full p-3"
             rows={3}
@@ -381,12 +482,19 @@ export default function IssueDetails() {
             onChange={(e) => setCommentText(e.target.value)}
           />
 
-          <button
-            onClick={addComment}
-            className="bg-black text-white px-4 py-2 mt-3 rounded"
-          >
-            Add Comment
-          </button>
+          <div className="flex justify-between mt-3">
+            <label className="cursor-pointer text-xl">
+              📎
+              <input type="file" hidden onChange={handleFileSelect} />
+            </label>
+
+            <button
+              onClick={addComment}
+              className="bg-black text-white px-4 py-2 rounded"
+            >
+              Post
+            </button>
+          </div>
         </div>
       </div>
       <div className="mt-10">

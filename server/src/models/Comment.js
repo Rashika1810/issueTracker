@@ -16,7 +16,12 @@ const commentSchema = new mongoose.Schema(
 
     text: {
       type: String,
-      required: true,
+      default: "",
+    },
+    attachment: {
+      fileName: String,
+      fileUrl: String,
+      mimeType: String,
     },
   },
   {

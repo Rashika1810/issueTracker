@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const path = require("path");
 const authRoutes = require("./routes/auth.routes");
 const organizationRoutes = require("./routes/organization.routes");
 const projectRoutes = require("./routes/project.routes");
@@ -31,5 +31,6 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 module.exports = app;
