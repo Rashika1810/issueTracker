@@ -6,13 +6,19 @@ const createNotification = require("../utils/createNotification");
 const { getIO } = require("../socket");
 exports.createIssue = async (req, res) => {
   try {
-    const { projectId, title, description, priority } = req.body;
+    const { projectId, title, description, priority, type, component, tags } =
+      req.body;
 
     const issue = await Issue.create({
       projectId,
       title,
       description,
       priority,
+
+      type,
+      component,
+      tags: tags || [],
+
       reporter: req.user.id,
     });
 
@@ -30,7 +36,7 @@ exports.createIssue = async (req, res) => {
 
 exports.getProjectIssues = async (req, res) => {
   try {
-    const { status, priority, assignee, search } = req.query;
+    const { status, priority, assignee, search, type, component } = req.query;
 
     const query = {
       projectId: req.params.projectId,
@@ -46,6 +52,13 @@ exports.getProjectIssues = async (req, res) => {
 
     if (assignee && assignee !== "All") {
       query.assignee = assignee;
+    }
+    if (type && type !== "All") {
+      query.type = type;
+    }
+
+    if (component && component !== "All") {
+      query.component = component;
     }
 
     if (search) {
@@ -111,7 +124,8 @@ exports.getIssueById = async (req, res) => {
 
 exports.updateIssue = async (req, res) => {
   try {
-    const { status, priority, assignee, dueDate } = req.body;
+    const { status, priority, assignee, dueDate, type, component, tags } =
+      req.body;
 
     const existingIssue = await Issue.findById(req.params.id);
 
@@ -129,6 +143,10 @@ exports.updateIssue = async (req, res) => {
         priority,
         assignee,
         dueDate,
+
+        type,
+        component,
+        tags,
       },
       {
         new: true,

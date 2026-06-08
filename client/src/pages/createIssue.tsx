@@ -14,6 +14,12 @@ export default function CreateIssue() {
 
   const [priority, setPriority] = useState("Medium");
 
+  const [type, setType] = useState("Task");
+
+  const [component, setComponent] = useState("Other");
+
+  const [tags, setTags] = useState("");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -26,6 +32,13 @@ export default function CreateIssue() {
         title,
         description,
         priority,
+        type,
+        component,
+
+        tags: tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
       },
       {
         headers: {
@@ -66,6 +79,50 @@ export default function CreateIssue() {
           <option>High</option>
           <option>Critical</option>
         </select>
+        <div>
+          <label>Issue Type</label>
+
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="border p-2 w-full"
+          >
+            <option>Bug</option>
+            <option>Feature</option>
+            <option>Task</option>
+            <option>Improvement</option>
+            <option>Hotfix</option>
+          </select>
+        </div>
+        <div>
+          <label>Component</label>
+
+          <select
+            value={component}
+            onChange={(e) => setComponent(e.target.value)}
+            className="border p-2 w-full"
+          >
+            <option>Frontend</option>
+            <option>Backend</option>
+            <option>API</option>
+            <option>Database</option>
+            <option>DevOps</option>
+            <option>Mobile</option>
+            <option>UI/UX</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label>Tags (optional)</label>
+
+          <input
+            type="text"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="login,payment,oauth"
+            className="border p-2 w-full"
+          />
+        </div>
 
         <button className="bg-black text-white px-4 py-2">Create Issue</button>
       </form>

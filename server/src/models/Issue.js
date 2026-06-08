@@ -42,7 +42,28 @@ const issueSchema = new mongoose.Schema(
       required: true,
     },
 
-    labels: [
+    type: {
+      type: String,
+      enum: ["Bug", "Feature", "Task", "Improvement", "Hotfix"],
+      default: "Task",
+    },
+
+    component: {
+      type: String,
+      enum: [
+        "Frontend",
+        "Backend",
+        "API",
+        "Database",
+        "DevOps",
+        "Mobile",
+        "UI/UX",
+        "Other",
+      ],
+      default: "Other",
+    },
+
+    tags: [
       {
         type: String,
       },

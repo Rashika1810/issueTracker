@@ -23,6 +23,11 @@ export default function IssueDetails() {
   const [members, setMembers] =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useState<any[]>([]);
+  const [type, setType] = useState("");
+
+  const [component, setComponent] = useState("");
+
+  const [tags, setTags] = useState("");
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
     fetchIssue();
@@ -131,6 +136,11 @@ export default function IssueDetails() {
     setStatus(issueData.status);
     setPriority(issueData.priority);
     setAssignee(res.data.issue.assignee?._id || "");
+    setType(res.data.issue.type);
+
+    setComponent(res.data.issue.component);
+
+    setTags(res.data.issue.tags?.join(",") || "");
 
     setDueDate(
       res.data.issue.dueDate
@@ -180,6 +190,14 @@ export default function IssueDetails() {
           priority,
           assignee,
           dueDate,
+
+          type,
+          component,
+
+          tags: tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter(Boolean),
         },
         {
           headers: {
@@ -249,6 +267,38 @@ export default function IssueDetails() {
             <option>Critical</option>
           </select>
         </span>
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="border p-2"
+        >
+          <option>Bug</option>
+          <option>Feature</option>
+          <option>Task</option>
+          <option>Improvement</option>
+          <option>Hotfix</option>
+        </select>
+        <select
+          value={component}
+          onChange={(e) => setComponent(e.target.value)}
+          className="border p-2"
+        >
+          <option>Frontend</option>
+          <option>Backend</option>
+          <option>API</option>
+          <option>Database</option>
+          <option>DevOps</option>
+          <option>Mobile</option>
+          <option>UI/UX</option>
+          <option>Other</option>
+        </select>
+        <input
+          type="text"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          className="border p-2 w-full"
+          placeholder="login,payment"
+        />
       </div>
       <div className="mt-4">
         <label className="block mb-2">Assignee</label>

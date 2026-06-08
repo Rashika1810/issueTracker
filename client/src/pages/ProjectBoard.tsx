@@ -24,6 +24,9 @@ export default function ProjectBoard() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [members, setMembers] = useState<any[]>([]);
+  const [typeFilter, setTypeFilter] = useState("All");
+
+  const [componentFilter, setComponentFilter] = useState("All");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -93,6 +96,13 @@ export default function ProjectBoard() {
 
       if (assigneeFilter !== "All") {
         params.append("assignee", assigneeFilter);
+      }
+      if (typeFilter !== "All") {
+        params.append("type", typeFilter);
+      }
+
+      if (componentFilter !== "All") {
+        params.append("component", componentFilter);
       }
 
       const res = await api.get(`/issues/project/${id}?${params.toString()}`, {
@@ -238,6 +248,23 @@ export default function ProjectBoard() {
                             }`}
                           >
                             <h3 className="font-medium">{issue.title}</h3>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {issue.type}
+                            </div>
+
+                            <div className="text-xs text-blue-600">
+                              {issue.component}
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {issue.tags?.map((tag: string, index: number) => (
+                                <span
+                                  key={index}
+                                  className="bg-gray-200 text-xs px-2 py-1 rounded"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
 
                             <p className="text-sm text-gray-500 mt-1">
                               {issue.priority}
